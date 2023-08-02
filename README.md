@@ -788,11 +788,20 @@ Finally we must also create our startup file. Head over to the home directory wi
 # This is a startup script
 
 # Turn on Neo4j
-echo "Turning off Neo4j database..." >> /home/ubuntu/output.txt
+echo "Turning on Neo4j database..." >> /home/ubuntu/output.txt
 sudo service neo4j start
 
 echo "deleting past data" >> /home/ubuntu/output.txt
+
+sleep 1
+echo "Executing query1.cql..." >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query1.cql >> /home/ubuntu/output.txt
+
+sleep 1
+
 sudo rm -rf /var/lib/neo4j/import/output.csv
+
+sleep 2
 
 # Start SPADE
 echo "Starting SPADE..." >> /home/ubuntu/output.txt
@@ -827,10 +836,6 @@ sleep 12
 
 #connect to database
 # Execute the .cql queries
-
-# execute query1.cql
-echo "Executing query1.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query1.cql >> /home/ubuntu/output.txt
 
 # execute query2.cql
 echo "Executing query2.cql..." >> /home/ubuntu/output.txt
