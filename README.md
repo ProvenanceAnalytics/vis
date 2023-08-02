@@ -813,13 +813,23 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
             viz.stabilize();
         });
         function updateStatus() {
-            fetch('http://18.116.151.211:8081/status')
-  .then(response => response.text())
-  .then(status => {
-    document.getElementById('statusBox').innerText = status;
-  });
-        }
+    fetch('http://18.116.151.211:8081/status')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(status => {
+            document.getElementById('statusBox').innerText = status;
+        })
+        .catch(error => {
+            document.getElementById('statusBox').innerText = 'Instance is offline';
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+}
 setInterval(updateStatus, 3000);
+
 
     </script>
 </body>
