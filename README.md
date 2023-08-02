@@ -248,7 +248,7 @@ In query4.cql the contents will be:
 ```
 USING PERIODIC COMMIT 200
 LOAD CSV WITH HEADERS FROM "file:///output.csv" AS row
-WITH row.id AS id, row.from AS from, row.to AS to, row.type AS type, row.`annot>
+WITH row.id AS id, row.from AS from, row.to AS to, row.type AS type, row.`annotations_event id` AS event_id, row.`annotations_time` AS time
 WHERE from IS NOT NULL AND to IS NOT NULL
 MERGE (f:Process {id: from})
 MERGE (t:Process {id: to})
