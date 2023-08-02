@@ -665,7 +665,7 @@ If at any point the placement of the code seems to not make sense, here is the f
             var config = {
                 containerId: "viz",
                 neo4j: {
-                    serverUrl: "bolt://INSTANCE.IP.ADDRESS:7687",
+                    serverUrl: "bolt://INSTANCE.PUBLIC.IPV4.ADDRESS:7687",
                     serverUser: "neo4j",
                     serverPassword: "REPLACE-WITH-YOUR-PASSWORD"
                 },
