@@ -71,7 +71,7 @@ Request ID
 ``` 
 Now that our lambda function is set up, we must have a trigger that will start the function. Head back to the management console and search for the API gateway service. Click on the orange button Create API. Scroll down to the REST API option. We will use the first one which has this description "Develop a REST API where you gain complete control over the request and response along with API management capabilities." Click build and leave everything as is except for the endpoint type. Change it to regional. Click Create API. This should take you to its configuration. You should see a button that says Actions. Click that and select Create Method. Click the drop-down in the small box that was created. Select GET and click the small check mark. Another screen will appear and you will leave everything the same except you will check off the "Use Lambda Proxy integration" box. You will also put the name of the lambda function you made in the previous step. Next you will click the Actions button again and click enable CORS to allow our website to use the API. Leave everything the same and click the blue button that says "Enable CORS and replace exisiting CORS headers". Click on the "Yes, replace exisiting values" button when it pops up. Next click the Actions button again and click "Deploy API". Create a new deployment stage and name it what you would like and select it as the stage. Once you deploy it, an invoke URL will be given which you will use later in the HTML code.
 ## Configuring the security group
-Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow the following Ports with TCP and Anywhere IPV4 as the source: 7687, 7474, 19998, 29998, 19999, 8080, and 7473.
+Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow the following Ports with TCP and Anywhere IPV4 as the source: 7687, 7474, 19998, 29998, 19999, 8080, 8081, and 7473.
 ## Building the start button
 Once we have our lambda function setup with our API gateway. We head back to our html file and add this code:
  ``` 
@@ -371,9 +371,27 @@ Save the file and exit. Now we must set up another server on the instance.
 ### Setting up the output log in the backend
 Run `cd` and `nano server.js` Fill it with:
 ```
-const fs = require('fs');
+const http = require('http');
 const WebSocket = require('ws');
+const fs = require('fs');
+const url = require('url');
 
+// Function to update status
+function updateStatus() {
+    const status = "Application status: OK\nUpdated at: " + new Date();
+    fs.writeFile('/home/ubuntu/status.txt', status, err => {
+        if (err) {
+            console.log('Error writing to status file', err);
+        } else {
+            console.log('Successfully wrote to status file');
+        }
+    });
+}
+
+// Update status every 2 seconds
+setInterval(updateStatus, 2000);
+
+// Websocket Server
 const wss = new WebSocket.Server({ port: 8080 });
 
 wss.on('connection', ws => {
@@ -400,6 +418,18 @@ wss.on('connection', ws => {
   });
 });
 
+// HTTP Server for Status
+http.createServer(function (req, res) {
+  if (url.parse(req.url, true).pathname === '/status') {
+    fs.readFile('/home/ubuntu/status.txt', function(err, data) {
+      res.writeHead(200, {'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*'});
+      res.write(data);
+      res.end();
+    });
+  }
+}).listen(8081);
+
+
 ```
 Save the file and exit.
 ##### We must install the required services for this to run. Run `cd` then 
@@ -416,6 +446,7 @@ sudo apt install awscli -y
 npm init -y
 npm install aws-sdk
 npm install ws
+npm install os-utils
 ```
 We must also configure our role. Run `aws configure` and a few prompts will come up with information you can find in the IAM management console. Head over to IAM in the management console and click on users. Create a user and click next, then click the attach polices option and you will want to attach these policies: `AmazonEC2FullAccess` and click next. Then create user, and then click on the user you just created. Click on the security credentials tab and scroll down to access key and click create access key. Click the command line interface option and then next. Then click create access key. Scroll down and you should see the information that the instance is asking for. The default region can also be seen in the instance configuration. Look in the top right and it should be the tab to the left of your username. Click it and it should tell you what region you are. Leave the last prompt blank by clicking enter. Once it is configured we move onto the next step.
 Now we want this server which captures the output log of the terminal to start when the instance is booted. This can be achieved. Run `sudo nano /etc/systemd/system/websocket.service` Now paste this into the file 
@@ -608,8 +639,7 @@ If at any point the placement of the code seems to not make sense, here is the f
 <html>
 <head>
     <title>Visualization Pipline</title>
-    <meta http-equiv="refresh" content="10">
-
+    <meta http-equiv="refresh" content="20">
     <style type="text/css">
         body {
             font: 16pt Arial;
@@ -641,6 +671,11 @@ If at any point the placement of the code seems to not make sense, here is the f
             display: flex;
             gap: 10px;
         }
+        #statusBox {
+            border: 1px solid red;
+            min-height: 30px;
+        }
+
     </style>
 
     <script type="text/javascript" src="https://unpkg.com/neovis.js@2.0.2"></script>
@@ -656,9 +691,11 @@ If at any point the placement of the code seems to not make sense, here is the f
         <button id="reload">Submit</button>
         <button id="stabilize">Stabilize</button>
     </div>
+    <div id="statusBox">Initial Status</div>
     <div id="viz"></div>
     <div id="terminal-output"></div>
     <pre id="output"></pre>
+
 
     <script>
         var viz;
@@ -667,9 +704,9 @@ If at any point the placement of the code seems to not make sense, here is the f
             var config = {
                 containerId: "viz",
                 neo4j: {
-                    serverUrl: "bolt://INSTANCE.PUBLIC.IPV4.ADDRESS:7687",
+                    serverUrl: "bolt://18.116.151.211:7687",
                     serverUser: "neo4j",
-                    serverPassword: "REPLACE-WITH-YOUR-PASSWORD"
+                    serverPassword: "@Andrew07"
                 },
                 labels:  {
                 Activity: {
@@ -721,20 +758,20 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
         }
         
         $("#start-button").click(function() {
-            $.get("YOUR-START-BUTTON-INVOKE-URL", function(data, status){
+            $.get("https://w0zkfy0xda.execute-api.us-east-2.amazonaws.com/prod2", function(data, status){
                 console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
                 $('#terminal-output').append("Data: " + JSON.stringify(data) + "\nStatus: " + status + "\n");
             });
         });
 
         $("#stop-button").click(function() {
-            $.get("YOUR-STOP-BUTTON-INVOKE-URL", function(data, status){
+            $.get("https://zxe63gzu31.execute-api.us-east-2.amazonaws.com/prod2", function(data, status){
                 console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
                 $('#terminal-output').append("Data: " + JSON.stringify(data) + "\nStatus: " + status + "\n");
             });
         });
 
-        let socket = new WebSocket("ws://INSTANCE-IP-ADDRESS:8080");
+        let socket = new WebSocket("ws://18.116.151.211:8080");
 
         socket.onopen = function(e) {
             console.log("[open] Connection established");
@@ -775,6 +812,15 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
         $("#stabilize").click(function () {
             viz.stabilize();
         });
+        function updateStatus() {
+            fetch('http://18.116.151.211:8081/status')
+  .then(response => response.text())
+  .then(status => {
+    document.getElementById('statusBox').innerText = status;
+  });
+        }
+setInterval(updateStatus, 3000);
+
     </script>
 </body>
 </html>
