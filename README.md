@@ -830,19 +830,19 @@ sleep 12
 
 # execute query1.cql
 echo "Executing query1.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query1.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query1.cql >> /home/ubuntu/output.txt
 
 # execute query2.cql
 echo "Executing query2.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query2.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query2.cql >> /home/ubuntu/output.txt
 
 # execute query3.cql
 echo "Executing query3.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query3.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query3.cql >> /home/ubuntu/output.txt
 
 # execute query4.cql
 echo "Executing query4.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query4.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query4.cql >> /home/ubuntu/output.txt
 
 echo "Done" >> /home/ubuntu/output.txt
 ```
