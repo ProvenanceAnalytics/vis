@@ -847,7 +847,8 @@ Finally we must also create our startup file. Head over to the home directory wi
 
 # Turn on Neo4j
 echo "Turning on Neo4j database..." >> /home/ubuntu/output.txt
-sudo service neo4j start
+sleep 12 >> /home/ubuntu/output.txt
+sudo systemctl start neo4j
 
 echo "deleting past data" >> /home/ubuntu/output.txt
 
@@ -865,16 +866,16 @@ sleep 2
 echo "Starting SPADE..." >> /home/ubuntu/output.txt
 sudo /home/ubuntu/SPADE/bin/spade start
 
-sleep 7 >> /home/ubuntu/output.txt
+sleep 5 >> /home/ubuntu/output.txt
 
 sudo python3 /home/ubuntu/hello-world
 
-sleep 3
+sleep 2
 
 # Turn off SPADE
 echo "Turning off SPADE..." >> /home/ubuntu/output.txt
 sudo /home/ubuntu/SPADE/bin/spade stop
-sleep 7 >> /home/ubuntu/output.txt
+sleep 5 >> /home/ubuntu/output.txt
 
 
 echo "Waiting a few seconds..." >> /home/ubuntu/output.txt
@@ -884,28 +885,21 @@ echo 5 >> /home/ubuntu/output.txt
 echo "Running the parser..." >> /home/ubuntu/output.txt
 sudo python3 /home/ubuntu/parser.py >> /home/ubuntu/output.txt
 
-# Turn on Neo4j
-echo "Turning on Neo4j database...">> /home/ubuntu/output.txt
-#sudo service neo4j start
-
-#wait for system to turn on
-echo "Waiting 12 seconds..." >> /home/ubuntu/output.txt
-sleep 12
 
 #connect to database
 # Execute the .cql queries
 
 # execute query2.cql
 echo "Executing query2.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query2.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query2.cql >> /home/ubuntu/output.txt
 
 # execute query3.cql
 echo "Executing query3.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query3.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query3.cql >> /home/ubuntu/output.txt
 
 # execute query4.cql
 echo "Executing query4.cql..." >> /home/ubuntu/output.txt
-cypher-shell -u neo4j -p YOUR-PASSWORD -f /home/ubuntu/query4.cql >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query4.cql >> /home/ubuntu/output.txt
 
 echo "Done" >> /home/ubuntu/output.txt
 ```
