@@ -608,6 +608,8 @@ If at any point the placement of the code seems to not make sense, here is the f
 <html>
 <head>
     <title>Visualization Pipline</title>
+    <meta http-equiv="refresh" content="10">
+
     <style type="text/css">
         body {
             font: 16pt Arial;
