@@ -777,7 +777,7 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
 </body>
 </html>
 ```
-Finally we must also create our startup file. Head over to the home directory with `cd` or `cd /home/ubuntu` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. 
+Finally we must also create our startup file. Head over to the home directory with `cd` or `cd /home/ubuntu` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. Make sure to replace the password with your own.
 ```
 #!/bin/bash
 # node /home/ubuntu/server.js &
