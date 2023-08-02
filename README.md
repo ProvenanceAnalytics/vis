@@ -704,7 +704,7 @@ If at any point the placement of the code seems to not make sense, here is the f
             var config = {
                 containerId: "viz",
                 neo4j: {
-                    serverUrl: "bolt://18.116.151.211:7687",
+                    serverUrl: "bolt://INSTANCE.IP.ADDRESS:7687",
                     serverUser: "neo4j",
                     serverPassword: "@Andrew07"
                 },
@@ -771,7 +771,7 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
             });
         });
 
-        let socket = new WebSocket("ws://18.116.151.211:8080");
+        let socket = new WebSocket("ws://REPLACE-WITH-INSTANCE-IP-ADDRESS:8080");
 
         socket.onopen = function(e) {
             console.log("[open] Connection established");
@@ -813,7 +813,7 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
             viz.stabilize();
         });
         function updateStatus() {
-    fetch('http://18.116.151.211:8081/status')
+    fetch('http://REPLACE-WITH-INSTANCE-IP-ADDRESS:8081/status')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
