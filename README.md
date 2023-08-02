@@ -756,3 +756,112 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
 </body>
 </html>
 ```
+Finally we must also create our startup file. Head over to the home directory with `cd` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. 
+```
+#!/bin/bash
+# node /home/ubuntu/server.js &
+
+# exec > /home/ubuntu/output.txt 2>&1
+> /home/ubuntu/output.txt
+
+# This is a startup script
+
+# Turn on Neo4j
+echo "Turning off Neo4j database..." >> /home/ubuntu/output.txt
+sudo service neo4j start
+
+echo "deleting past data" >> /home/ubuntu/output.txt
+sudo rm -rf /var/lib/neo4j/import/output.csv
+
+# Start SPADE
+echo "Starting SPADE..." >> /home/ubuntu/output.txt
+sudo /home/ubuntu/SPADE/bin/spade start
+
+sleep 7 >> /home/ubuntu/output.txt
+
+sudo python3 /home/ubuntu/hello-world
+
+sleep 3
+
+# Turn off SPADE
+echo "Turning off SPADE..." >> /home/ubuntu/output.txt
+sudo /home/ubuntu/SPADE/bin/spade stop
+sleep 7 >> /home/ubuntu/output.txt
+
+
+echo "Waiting a few seconds..." >> /home/ubuntu/output.txt
+echo 5 >> /home/ubuntu/output.txt
+
+# Run your parser here.
+echo "Running the parser..." >> /home/ubuntu/output.txt
+sudo python3 /home/ubuntu/parser.py >> /home/ubuntu/output.txt
+
+# Turn on Neo4j
+echo "Turning on Neo4j database...">> /home/ubuntu/output.txt
+#sudo service neo4j start
+
+#wait for system to turn on
+echo "Waiting 12 seconds..." >> /home/ubuntu/output.txt
+sleep 12
+
+#connect to database
+# Execute the .cql queries
+
+# execute query1.cql
+echo "Executing query1.cql..." >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query1.cql >> /home/ubuntu/output.txt
+
+# execute query2.cql
+echo "Executing query2.cql..." >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query2.cql >> /home/ubuntu/output.txt
+
+# execute query3.cql
+echo "Executing query3.cql..." >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query3.cql >> /home/ubuntu/output.txt
+
+# execute query4.cql
+echo "Executing query4.cql..." >> /home/ubuntu/output.txt
+cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query4.cql >> /home/ubuntu/output.txt
+
+echo "Done" >> /home/ubuntu/output.txt
+```
+Now we must make this a service as well so that it will start on boot. Head over to `sudo nano /etc/systemd/system/startup.service` and enter this information:
+```
+[Unit]
+Description=Startup Script
+
+[Service]
+ExecStart=/home/ubuntu/scripts/startup.sh
+Restart=on-failure
+User=ubuntu
+Group=nogroup
+Environment=PATH=/usr/bin:/usr/local/bin
+WorkingDirectory=/home/ubuntu/scripts/
+
+[Install]
+WantedBy=multi-user.target
+```
+Now save the file and exit. Now we need to give ownership of the startup.sh script to the Ubuntu user and make it executable:
+```
+sudo chown ubuntu:ubuntu /home/ubuntu/scripts/startup.sh
+chmod +x /home/ubuntu/scripts/startup.sh
+```
+Let systemd know there is a new service:
+```
+sudo systemctl daemon-reload
+```
+Enable your service to be run at startup:
+
+```
+sudo systemctl enable startup
+```
+You can start it immediately (without rebooting) with:
+```
+sudo systemctl start startup
+```
+To check the status of your service:
+```
+sudo systemctl status startup
+```
+Now that our startup is ready, the project should be finished.
+
