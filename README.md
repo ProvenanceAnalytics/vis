@@ -877,14 +877,12 @@ echo "Turning off SPADE..." >> /home/ubuntu/output.txt
 sudo /home/ubuntu/SPADE/bin/spade stop
 sleep 5 >> /home/ubuntu/output.txt
 
-
 echo "Waiting a few seconds..." >> /home/ubuntu/output.txt
 echo 5 >> /home/ubuntu/output.txt
 
 # Run your parser here.
 echo "Running the parser..." >> /home/ubuntu/output.txt
 sudo python3 /home/ubuntu/parser.py >> /home/ubuntu/output.txt
-
 
 #connect to database
 # Execute the .cql queries
@@ -902,6 +900,7 @@ echo "Executing query4.cql..." >> /home/ubuntu/output.txt
 cypher-shell -u neo4j -p @Andrew07 -f /home/ubuntu/query4.cql >> /home/ubuntu/output.txt
 
 echo "Done" >> /home/ubuntu/output.txt
+
 ```
 Now we must make this a service as well so that it will start on boot. Head over to `sudo nano /etc/systemd/system/startup.service` and enter this information:
 ```
