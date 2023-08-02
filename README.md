@@ -10,11 +10,11 @@ This project is about running a SPADE program on an EC2 instance that collects p
 ###### PuTTY or SSH of your choice
 ###### t2 medium instance
 ## Overview 
-The website will consist of a start button which will start an EC2 instance with Ubuntu, SPADE, and Node installed. The instance will then run a startup script which will run a program which creates a file named hello-world. The creation of this file will create provenance which SPADE will capture. That provenance, which is in a JSON format, will get parsed into a CSV file. That CSV file will be used with Cypher Queries to be sent to a Neo4j database. The queries will establish nodes and relationships which will be viewable with our usage of Neovis. The website will have a display of the database, with nodes and relationships being easilly viewable. Each node and relationship will have its own information. The information will be viewable with a hover over the chosen piece. The website will also have a box where the user can submit cypher queries of their own to manipulate the visulization how they find suit with a stablization button as the graph does have interesting physics. Below the graph will be a output of the virtual machine. The output shows the startup script in action. Finally there is a stop button to turn off the instance.
+The website will consist of a start button which will start an EC2 instance with Ubuntu, SPADE, and Node installed. The instance will then run a startup script which will run a program that creates a file named hello-world. The creation of this file will create provenance which SPADE will capture. That provenance, which is in a JSON format, will get parsed into a CSV file. That CSV file will be used with Cypher Queries to be sent to a Neo4j database. The queries will establish nodes and relationships which will be viewable with our usage of Neovis. The website will have a display of the database, with nodes and relationships being easilly viewable. Each node and relationship will have its own information. The information will be viewable with a hover over the chosen piece. The website will also have a box where the user can submit cypher queries of their own to manipulate the visualization how they find suit with a stabilization button as the graph does have interesting physics. Below the graph will be the output of the virtual machine. The output shows the startup script in action. Finally, there is a stop button to turn off the instance.
 ## Getting Started
-First we start with a basic html file in VSCode. To do this, we make a new file and name it what you would like as long as it ends with .html. Looking at our layout, we need a button that start a virtual machine. We can achieve that with the AWS services. We will use an API gateway and a Lambda function. In our HTML file we should first start with a title as such: `<title>Visualization Pipline</title>`. Then we start with `<head>`. Then we will create a button using `<button id="start-button">Start EC2 Instance</button>`. Now that we have a button we will switch over to AWS.
+First, we start with a basic html file in VSCode. To do this, we make a new file and name it what you would like as long as it ends with .html. Looking at our layout, we need a button that starts a virtual machine. We can achieve that with the AWS services. We will use an API gateway and a Lambda function. In our HTML file, we should first start with a title as such: `<title>Visualization Pipline</title>`. Then we start with `<head>`. Then we will create a button using `<button id="start-button">Start EC2 Instance</button>`. Now that we have a button we will switch over to AWS.
 ## AWS Start Instance
-Log into the AWS service and head over to the management console. We will first visit EC2 to establish our instance. Search for "EC2" and click the first result. Then click on instances and in the top right click on launch instances. Name it whatever you want and in the Application and OS images you will want to select Ubuntu in the Quick Start tab. For the Instance type we will use a t2.medium. You will want to create a key pair so that we can access the virtual machine. Click the create a key pair button and choose your name. Then we will use an RSA pair with .ppk so that we can use PuTTY. Click create key pair. We will create a new security group so that we can customize what connections we allow into and out of the instance. Also we will allow SSH traffic from anywhere and check off the other two boxes with allowing HTTPS and HTTP. In the storage section will we change the storage to 30 GiB of gp3. Also a medium sized instance is required for this project. Then we will click launch instance. Head back to the EC2 dashboard and instead of clicking on Instances, we will head over to elastic IPs. In the top right, click allocate elastic IP address. Leave everything to defualt and click allocate. Then click on the IP address you just created and in the top right click allocate elastic IP address. Allocate it to an instance and select your instance. Leave everything else to default and click associate. Now that we have our EC2 instance set up with an elastic IP address we can head back over to our management console. Search for Lambda and click on it. Then click on create function. We will use Author from scratch. Name it and select Python 3.11 as our Runtime. Also we will change the execution role. Select "Create a new role with basic Lambda permissions". Then we create the function. We need to give this role permissions so we head back to the AWS management console. Search for "IAM" and click on it. Scroll down and click on roles. Click on the role that was created. Scroll down and look for add permissions. Click attach polices and you will attach these policies: "CloudWatchLogsFullAccess" , "AmazonEC2FullAccess", "AmazonEC2RoleforSSM", "AmazonSSMManagedInstanceCore". We need to take a quick detour. Head to your EC2 management console and select the box beside your instance. Click on the actions button and then security and then modify IAM role. Select the role that you just created. Once you are finished, head back to Lambda in the managment console. Click on the function that you created. You should be taken to the functions configuration. Scroll down to code and implement this code snippet instead of the default.
+Log into the AWS service and head over to the management console. We will first visit EC2 to establish our instance. Search for "EC2" and click the first result. Then click on instances and in the top right click on launch instances. Name it whatever you want and in the Application and OS images, you will want to select Ubuntu in the Quick Start tab. For the Instance type we will use a t2.medium. You will want to create a key pair so that we can access the virtual machine. Click the Create a key pair button and choose your name. Then we will use an RSA pair with .ppk so that we can use PuTTY. Click Create key pair. We will create a new security group so that we can customize what connections we allow into and out of the instance. Also, we will allow SSH traffic from anywhere and check off the other two boxes with allowing HTTPS and HTTP. In the storage section will we change the storage to 30 GiB of gp3. Also, a medium sized instance is required for this project. Then we will click launch instance. Head back to the EC2 dashboard and instead of clicking on Instances, we will head over to elastic IPs. In the top right, click allocate an elastic IP address. Leave everything to default and click allocate. Then click on the IP address you just created and in the top right click allocate elastic IP address. Allocate it to an instance and select your instance. Leave everything else to default and click associate. Now that we have our EC2 instance set up with an elastic IP address we can head back over to our management console. Search for Lambda and click on it. Then click on create function. We will use Author from scratch. Name it and select Python 3.11 as our Runtime. Also we will change the execution role. Select "Create a new role with basic Lambda permissions". Then we create the function. We need to give this role permissions so we head back to the AWS management console. Search for "IAM" and click on it. Scroll down and click on roles. Click on the role that was created. Scroll down and look for add permissions. Click attach polices and you will attach these policies: "CloudWatchLogsFullAccess" , "AmazonEC2FullAccess", "AmazonEC2RoleforSSM", "AmazonSSMManagedInstanceCore". We need to take a quick detour. Head to your EC2 management console and select the box beside your instance. Click on the actions button and then security and then modify IAM role. Select the "Create new IAM role" button. Then click create role. Select aws service and EC2. You want to add the permissions listed earlier and then click next. Give it a meaningful name and click create role. Head back to your EC2 management console and head back to the modify IAM role of your EC2 instance screen and select the role you just created. Once you are finished, head back to Lambda in the managment console. Click on the function that you created. You should be taken to the configuration of the function. Scroll down to code and implement this code snippet instead of the default.
  ```python
 import json
 import boto3
@@ -44,7 +44,7 @@ def lambda_handler(event, context):
     
 
 ```
-Next you will want to deploy these changes. Before testing we must change a setting. Click on the configuration tab and head over to the general configuration tab. Click edit and set the timeout to 14 minutes and 59 seconds. Save the changes and deploy again. Finally test the code and the result should be as such 
+Next you will want to deploy these changes. Before testing we must change a setting. Click on the configuration tab and head over to the general configuration tab. Click edit and set the timeout to 14 minutes and 59 seconds. Save the changes and deploy again. Finally, test the code and the result should be as such 
 ``` 
 Test Event Name
 2
@@ -69,9 +69,9 @@ REPORT RequestId: 930bf327-3202-4314-a1f2-2495aba5383c	Duration: 2530.24 ms	Bill
 Request ID
 930bf327-3202-4314-a1f2-2495aba5383c 
 ``` 
-Now that our lambda function is set up, we must have a trigger that will start the function. Head back to the management console and search for the API gateway service. Click on the orange button Create API. Scroll down to the REST API option. We will use the first one which has this description "Develop a REST API where you gain complete control over the request and response along with API management capabilities." Click build and leave everything as is except for the endpoint type. Change it to regional. Click Create API. This should take you to its configuration. You should see a button that says Actions. Click that and select Create Method. Click the drop down in the small box that was created. Select GET and click the small check mark. Another screen will appear and you will leave everything the same except you will check off the "Use Lambda Proxy integration" box. You will also put the name of the lambda function you made in the previous step. Next you will click the Actions button again and click enable CORS to allow our website to use the API. Leave everything the same and click the blue button that says "Enable CORS and replace exisiting CORS headers". Click on the "Yes, replace exisiting values" button when it pops up. Next click the Actions button again and click "Deploy API". Create a new deployment stage and name it what you would like and select it as the stage. Once you deploy it, an invoke URL will be given which you will use later in the HTML code.
+Now that our lambda function is set up, we must have a trigger that will start the function. Head back to the management console and search for the API gateway service. Click on the orange button Create API. Scroll down to the REST API option. We will use the first one which has this description "Develop a REST API where you gain complete control over the request and response along with API management capabilities." Click build and leave everything as is except for the endpoint type. Change it to regional. Click Create API. This should take you to its configuration. You should see a button that says Actions. Click that and select Create Method. Click the drop-down in the small box that was created. Select GET and click the small check mark. Another screen will appear and you will leave everything the same except you will check off the "Use Lambda Proxy integration" box. You will also put the name of the lambda function you made in the previous step. Next you will click the Actions button again and click enable CORS to allow our website to use the API. Leave everything the same and click the blue button that says "Enable CORS and replace exisiting CORS headers". Click on the "Yes, replace exisiting values" button when it pops up. Next click the Actions button again and click "Deploy API". Create a new deployment stage and name it what you would like and select it as the stage. Once you deploy it, an invoke URL will be given which you will use later in the HTML code.
 ## Configuring the security group
-Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow these following Ports with TCP and Anywhere IPV4 as the source: 7687, 7474, 19998, 29998, 19999, 8080, and 7473.
+Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow the following Ports with TCP and Anywhere IPV4 as the source: 7687, 7474, 19998, 29998, 19999, 8080, and 7473.
 ## Building the start button
 Once we have our lambda function setup with our API gateway. We head back to our html file and add this code:
  ``` 
@@ -86,7 +86,7 @@ $("#start-button").click(function() {
 ```
 You can now test out your button by clicking it and going over to the EC2 management console and clicking on your instance and seeing the state. If you see pending... the instance is booting up and Running means that its up and ready to go.
 ## AWS Stop Instance
-Now that we can start the instance, we need a way to stop it. We will follow the exact same steps we took with the lambda function and the API gateway, except this time we will change the code in the lambda function and when building the lambda function, for the default execution role, we will select the one we created back when we made the button for the start function. This is the updated code we will use in the lambda function: 
+Now that we can start the instance, we need a way to stop it. We will follow the exact same steps we took with the lambda function and the API gateway, except this time we will change the code in the lambda function and when building the lambda function, for the default execution role, we will select the one we created back when we made the button for the start function. Also this time we do not need to create a new role, in the settings of the creation of the function we can use an existing role which we will use the one we created earlier. This is the updated code we will use in the lambda function: 
 ```
 import boto3
 
@@ -162,7 +162,7 @@ Once SPADE is installed we must configure it. We should be in the SPADE director
 cd bin 
 nano spade 
 ```
-Now that we are in the configuration file scroll down untill you see these lines:
+Now that we are in the configuration file scroll down until you see these lines:
 ```
 JVMARGS="-server -Xms8G -Xmx16G"
 JVMARGSDEBUG="-server -Xms8G -Xmx16G -XX:+UseConcMarkSweepGC"
@@ -172,7 +172,15 @@ Change them to this to decrease the heap size:
 JVMARGS="-server -Xms1G -Xmx2G"
 JVMARGSDEBUG="-server -Xms1G -Xmx2G -XX:+UseConcMarkSweepGC"
 ```
-Save the file with Ctrl + O and exit with Ctrl + X. Now that SPADE is ready to launch we should test it. Head back to the SPADE directory with `cd ..` and run `./bin/spade start` SPADE should start with a PID. Now we must add our filters and storages and reporters. Run `./bin/spade control` Now that we are in the control we can configure SPADE. We will first add a storage with `add storage JSON output=/tmp/provenance2.json` and we will add a filter to track only the hello-world program with `add filter AddAnnotation position=1 program=hello-world` Finally we will add a reporter with `add reporter Audit` Before we see the data in action we must configure the Linux audit. Run `sudo -i` to run everything as root. First run `nano /etc/audit/rules.d/audit.rules` We will be taken to a file in which we much change the value of `--backlog_wait_time` to 300 instead of the default 600000. Ctrl + O to save this configuration and Ctrl + X to exit. Next run `nano /etc/audit/auditd.conf` Change this value `flush` to `SYNC` and `freq` to 5000. Save and exit the file. Now we can start SPADE. Run `exit` to get out of root. We need to also make the hello-world program so we must run `nano hello-world` and write the code: 
+Save the file with Ctrl + O and exit with Ctrl + X. Now that SPADE is ready to launch we should test it. Head back to the SPADE directory with `cd ..` and run `./bin/spade start` SPADE should start with a PID. Now we must add our filters and storages and reporters. Run `./bin/spade control` Now that we are in the control we can configure SPADE. We will first add a storage with `add storage JSON output=/tmp/provenance2.json` and we will add a filter to track only the hello-world program with `add filter AddAnnotation position=1 program=hello-world` Finally we will add a reporter but first we must change a few settings. Type `exit` in the control and turn off SPADE with `./bin/spade stop` and run these commands: 
+```
+sudo chmod ug+s `which auditctl`
+sudo chmod ug+s `which iptables`
+sudo chmod ug+s `which kmod`
+sudo chown root bin/spadeAuditBridge
+sudo chmod ug+s bin/spadeAuditBridge
+```
+Then run `sudo nano /etc/audit/plugins.d/af_unix.conf` and change `active = no` to `active = yes`. Then we estart auditd to activate the dispatcher (audispd): `sudo service auditd restart`. Head back to the SPADE directory and start spade again with `./bin/spade start` and go back to the controller and add an audit reporter with `./bin/spade control` and `add reporter Audit`. Before we see the data in action we must configure the Linux audit. Run `sudo -i` to run everything as root. First run `nano /etc/audit/rules.d/audit.rules` We will be taken to a file in which we much change the value of `--backlog_wait_time` to 300 instead of the default 600000. Ctrl + O to save this configuration and Ctrl + X to exit. Next run `nano /etc/audit/auditd.conf` Change this value `flush` to `SYNC` and `freq` to 5000. Save and exit the file. Now we can start SPADE. Run `exit` to get out of root. We need to also make the hello-world program so we must run `nano hello-world` and write this code in /home/ubuntu: 
 ``` 
 print('hello, world!')
 ```
@@ -180,7 +188,7 @@ Save the file and exit. Now head over to the SPADE directory `cd SPADE` and star
 ### Installing Neo4j
 Head back over to the home directory with `cd` and run these commands:
 ```
-apt install apt-transport-https ca-certificates curl software-properties-common -y
+sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
 
 sudo curl -fsSL https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
 
@@ -199,7 +207,17 @@ cd
 
 sudo nano /etc/neo4j/neo4j.conf
 ```
-Now that we are in the configuration file we will change these lines. Remove the # in `dbms.default_listen_address=0.0.0.0`
+Now that we are in the configuration file we will change these lines.
+```
+#dbms.memory.heap.initial_size=512m
+#dbms.memory.heap.max_size=512m
+```
+to 
+```
+dbms.memory.heap.initial_size=500m
+dbms.memory.heap.max_size=500m
+```
+Remove the # in `dbms.default_listen_address=0.0.0.0`
 and remove the # in `dbms.connector.bolt.listen_address=:7687`
 Save the changes and exit the file. Restart the Neo4j service to implement the changes `sudo systemctl restart neo4j`
 The server will be turned on with our startup script. We must log into the database to set the username and password. We will do this by running `cypher-shell` Set the username and password but make sure to remember them. The default username is neo4j and the default password is neo4j. Once you type in these credentials, neo4j will ask you to choose a new password which you will have to store. Now that we have set up the database we can create the queries to be used to fill up the database. Head back over to the main directory with `cd` and make four files with 
@@ -397,6 +415,7 @@ sudo npm install ws
 sudo apt install awscli -y
 npm init -y
 npm install aws-sdk
+npm install ws
 ```
 We must also configure our role. Run `aws configure` and a few prompts will come up with information you can find in the IAM management console. Head over to IAM in the management console and click on users. Create a user and click next, then click the attach polices option and you will want to attach these policies: `AmazonEC2FullAccess` and click next. Then create user, and then click on the user you just created. Click on the security credentials tab and scroll down to access key and click create access key. Click the command line interface option and then next. Then click create access key. Scroll down and you should see the information that the instance is asking for. The default region can also be seen in the instance configuration. Look in the top right and it should be the tab to the left of your username. Click it and it should tell you what region you are. Leave the last prompt blank by clicking enter. Once it is configured we move onto the next step.
 Now we want this server which captures the output log of the terminal to start when the instance is booted. This can be achieved. Run `sudo nano /etc/systemd/system/websocket.service` Now paste this into the file 
@@ -405,7 +424,7 @@ Now we want this server which captures the output log of the terminal to start w
 Description=Node.js Server Script
 
 [Service]
-ExecStart=/usr/bin/node /home/ubuntu/server.js
+ExecStart=/home/ubuntu/.nvm/versions/node/v20.5.0/bin/node  /home/ubuntu/server.js
 Restart=always
 User=ubuntu
 Group=nogroup
@@ -758,7 +777,7 @@ initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
 </body>
 </html>
 ```
-Finally we must also create our startup file. Head over to the home directory with `cd` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. 
+Finally we must also create our startup file. Head over to the home directory with `cd` or `cd /home/ubuntu` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. 
 ```
 #!/bin/bash
 # node /home/ubuntu/server.js &
