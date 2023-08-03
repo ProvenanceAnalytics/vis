@@ -74,7 +74,7 @@ Now that our lambda function is set up, we must have a trigger that will start t
 Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow the following Ports with TCP and Anywhere IPV4 as the source: 7687 (neo4j db), 7474 (neo4j db), 19998 (neovis), 29998 (neovis), 19999 (neovis), 8080 (Node service), 8081 (Node service), and 7473 (neo4j db).
 ## Building the start button
 Once we have our lambda function setup with our API gateway. We head back to our html file and add this code:
- ``` 
+ ```html
 <script>
 $("#start-button").click(function() {
             $.get("API-INVOKE-URL-HERE", function(data, status){
@@ -87,7 +87,7 @@ $("#start-button").click(function() {
 You can now test out your button by clicking it and going over to the EC2 management console and clicking on your instance and seeing the state. If you see pending... the instance is booting up and Running means that its up and ready to go.
 ## AWS Stop Instance
 Now that we can start the instance, we need a way to stop it. We will follow the exact same steps we took with the lambda function and the API gateway, except this time we will change the code in the lambda function and when building the lambda function, for the default execution role, we will select the one we created back when we made the button for the start function. Also this time we do not need to create a new role, in the settings of the creation of the function we can use an existing role which we will use the one we created earlier. This is the updated code we will use in the lambda function: 
-```
+```python
 import boto3
 
 def lambda_handler(event, context):
