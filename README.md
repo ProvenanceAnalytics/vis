@@ -180,7 +180,7 @@ sudo chmod ug+s `which kmod`
 sudo chown root bin/spadeAuditBridge
 sudo chmod ug+s bin/spadeAuditBridge
 ```
-Then run `sudo nano /etc/audit/plugins.d/af_unix.conf` and change `active = no` to `active = yes`. Then we estart auditd to activate the dispatcher (audispd): `sudo service auditd restart`. Head back to the SPADE directory and start spade again with `./bin/spade start` and go back to the controller and add an audit reporter with `./bin/spade control` and `add reporter Audit`. Before we see the data in action we must configure the Linux audit. Run `sudo -i` to run everything as root. First run `nano /etc/audit/rules.d/audit.rules` We will be taken to a file in which we much change the value of `--backlog_wait_time` to 300 instead of the default 600000. Ctrl + O to save this configuration and Ctrl + X to exit. Next run `nano /etc/audit/auditd.conf` Change this value `flush` to `SYNC` and `freq` to 5000. Save and exit the file. Now we can start SPADE. Run `exit` to get out of root. We need to also make the hello-world program so we must run `nano hello-world` and write this code in /home/ubuntu: 
+Then run `sudo nano /etc/audit/plugins.d/af_unix.conf` and change `active = no` to `active = yes`. Then we start auditd to activate the dispatcher (audispd): `sudo service auditd restart`. Head back to the SPADE directory and start spade again with `./bin/spade start` and go back to the controller and add an audit reporter with `./bin/spade control` and `add reporter Audit`. Before we see the data in action we must configure the Linux audit. Run `sudo -i` to run everything as root. First run `nano /etc/audit/rules.d/audit.rules`. We will be taken to a file in which we must change the value of `--backlog_wait_time` to 300 instead of the default 600000. We do this so that the provenance data can appear in the audit log fast enough for our script. Ctrl + O to save this configuration and Ctrl + X to exit. Next run `nano /etc/audit/auditd.conf`. Change this value `flush` to `SYNC` and `freq` to 5000. Save and exit the file. Now we can start SPADE. Run `exit` to get out of root. We need to also make the hello-world program so we must run `nano hello-world` and write this code in /home/ubuntu: 
 ``` 
 print('hello, world!')
 ```
@@ -210,7 +210,7 @@ cd
 
 sudo nano /etc/neo4j/neo4j.conf
 ```
-Now that we are in the configuration file we will change these lines.
+Now that we are in the configuration file we will change these lines. [^neo4j]
 ```
 #dbms.memory.heap.initial_size=512m
 #dbms.memory.heap.max_size=512m
@@ -220,27 +220,31 @@ to
 dbms.memory.heap.initial_size=500m
 dbms.memory.heap.max_size=500m
 ```
+[^neo4j]: We change the heap size because neo4j cannot run without the heap size being specified.
 Remove the # in `dbms.default_listen_address=0.0.0.0`
 and remove the # in `dbms.connector.bolt.listen_address=:7687`
-Save the changes and exit the file. Restart the Neo4j service to implement the changes `sudo systemctl restart neo4j`
-The server will be turned on with our startup script. We must log into the database to set the username and password. We will do this by running `cypher-shell` Set the username and password but make sure to remember them. The default username is neo4j and the default password is neo4j. Once you type in these credentials, neo4j will ask you to choose a new password which you will have to store. Now that we have set up the database we can create the queries to be used to fill up the database. Head back over to the main directory with `cd` and make four files with 
+Save the changes and exit the file. Restart the Neo4j service to implement the changes `sudo systemctl restart neo4j`.
+The server will be turned on with our startup script. We must log into the database to set the username and password. We will do this by running `cypher-shell`. Set the username and password but make sure to remember them. The default username is neo4j and the default password is neo4j. Once you type in these credentials, neo4j will ask you to choose a new password which you will have to store. Now that we have set up the database we can create the queries to be used to fill up the database. Head back over to the main directory with `cd` and make four files with 
 ```
 nano query1.cql
 nano query2.cql
 nano query3.cql
 nano query4.cql
 ```
-In query1.cql the contents will be:
+In query1.cql the contents will be :
 ```
+#Deletes existing data in the neo4j database
 MATCH (n)
 DETACH DELETE n;
 ```
 In query2.cql the contents will be:
 ```
+#Builds an index for the creation of nodes and relationships to be optimized.
 CREATE INDEX index_name FOR (n:Process) ON (n.id);
 ```
 In query3.cql the contents will be:
 ```
+#Creates the nodes of the database
 LOAD CSV WITH HEADERS FROM "file:///output.csv" AS row
 WITH row
 WHERE row.id IS NOT NULL
@@ -249,6 +253,7 @@ SET p += row;
 ```
 In query4.cql the contents will be: 
 ```
+#Creates the relationships of the database
 USING PERIODIC COMMIT 200
 LOAD CSV WITH HEADERS FROM "file:///output.csv" AS row
 WITH row.id AS id, row.from AS from, row.to AS to, row.type AS type, row.`annotations_event id` AS event_id, row.`annotations_time` AS time
@@ -257,7 +262,7 @@ MERGE (f:Process {id: from})
 MERGE (t:Process {id: to})
 MERGE (f)-[r:RELATIONSHIP {type: type, eventId: event_id, time: time}]->(t);
 ```
-You will save and exit all of these files. Now that the queries are ready, we must import that parser. In the home directory `cd` we will make a new file with `nano parser.py` and fill it with 
+You will save and exit all of these files. Now that the queries are ready, we must implement a parser that parses the SPADE JSON audit log to CSV. In the home directory we will make a new file with `nano parser.py` and fill it with 
 ```
 import json
 import csv
@@ -370,8 +375,12 @@ with open('/var/lib/neo4j/import/output.csv', 'w', newline='') as csvfile:
 with open("/home/ubuntu/parser_done.txt", "w") as file:
     file.write("Parsing completed.")
 ```
-Save the file and exit. Now we must set up another server on the instance. 
+Save the file and exit. 
+
+
 ### Setting up the output log in the backend
+We are going to set up a server that will relay the output of the startup script and the status of the machine. On the website you will see a command line box and a status box. Any future output of the virtual machine must be redirected to `/home/ubuntu/output. txt ' for it show in the command line box. Similarly, any data that is streamed to the `/home/ubuntu/status.txt` will show up in the status box.
+
 Run `cd` and `nano server.js` Fill it with:
 ```
 const http = require('http');
