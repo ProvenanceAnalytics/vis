@@ -379,7 +379,7 @@ Save the file and exit.
 
 
 ### Setting up the output log in the backend
-We are going to set up a server that will relay the output of the startup script and the status of the machine. On the website you will see a command line box and a status box. Any future output of the virtual machine must be redirected to `/home/ubuntu/output. txt ' for it show in the command line box. Similarly, any data that is streamed to the `/home/ubuntu/status.txt` will show up in the status box.
+We are going to set up a server that will relay the output of the startup script and the status of the machine. On the website, you will see a command line box and a status box. Any future output of the virtual machine must be redirected to `/home/ubuntu/output.txt` for it to show in the command line box. Similarly, any data that is streamed to the `/home/ubuntu/status.txt` will show up in the status box.
 
 Run `cd` and `nano server.js` Fill it with:
 ```
@@ -460,7 +460,7 @@ npm install aws-sdk
 npm install ws
 npm install os-utils
 ```
-We must also configure our role. Run `aws configure` and a few prompts will come up with information you can find in the IAM management console. Head over to IAM in the management console and click on users. Create a user and click next, then click the attach polices option and you will want to attach these policies: `AmazonEC2FullAccess` and click next. Then create user, and then click on the user you just created. Click on the security credentials tab and scroll down to access key and click create access key. Click the command line interface option and then next. Then click create access key. Scroll down and you should see the information that the instance is asking for. The default region can also be seen in the instance configuration. Look in the top right and it should be the tab to the left of your username. Click it and it should tell you what region you are. Leave the last prompt blank by clicking enter. Once it is configured we move onto the next step.
+To run `server.js`, we must configure our role. Run `aws configure` and a few prompts will come up with information you can find in the IAM management console. Head over to IAM in the management console and click on users. Create a user and click next, then click the attach polices option and you will want to attach these policies: `AmazonEC2FullAccess` and click next. Then create user, and then click on the user you just created. Click on the security credentials tab and scroll down to access key and click create access key. Click the command line interface option and then next. Then click create access key. Scroll down and you should see the information that the instance is asking for. The default region can also be seen in the instance configuration. Look in the top right and it should be the tab to the left of your username. Click it and it should tell you what region you are. Leave the last prompt blank by clicking enter. Once it is configured we move onto the next step.
 Now we want this server which captures the output log of the terminal to start when the instance is booted. This can be achieved. Run `sudo nano /etc/systemd/system/websocket.service` Now paste this into the file 
 ```
 [Unit]
@@ -847,7 +847,9 @@ setInterval(updateStatus, 3000);
 </body>
 </html>
 ```
-Finally we must also create our startup file. Head over to the home directory with `cd` or `cd /home/ubuntu` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. Make sure to replace the password with your own.
+Finally we must also create our startup file. This startup file will run when the instance starts. It first turns on the Neo4j database and then turns on SPADE. It will then run the hello-world program. Then it will stop SPADE and run the parser. The parser will then send the new data to the Neo4j import folder so that the queries can use the parsed data to create the nodes and relationships in the graph. 
+
+Head over to the home directory with `cd` or `cd /home/ubuntu` and create a new directory `mkdir scripts` and a new file with `nano startup.sh`. Now that we are in the startup file we can put these commands in it. Make sure to replace the password with your own.
 ```
 #!/bin/bash
 # node /home/ubuntu/server.js &
