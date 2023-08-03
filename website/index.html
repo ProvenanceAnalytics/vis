@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visualization Pipline</title>
+    <meta http-equiv="refresh" content="20">
+    <style type="text/css">
+        body {
+            font: 16pt Arial;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        #viz {
+            width: 700px;
+            height: 400px;
+            border: 1px solid blue;
+            font: 22pt Arial;
+            background-color: rgb(232, 161, 161);
+        }
+
+        #terminal-output {
+            width: 400px; 
+            height: 200px;
+            font-size: 12px; 
+            word-wrap: break-word; 
+            border: 1px solid black;
+            overflow-y: auto;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 10px;
+        }
+        #statusBox {
+            border: 1px solid red;
+            min-height: 30px;
+        }
+
+    </style>
+
+    <script type="text/javascript" src="https://unpkg.com/neovis.js@2.0.2"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+</head>
+<body onload="draw()">
+    <div class="control-panel">
+        <button id="start-button">Start EC2 Instance</button>
+        <button id="stop-button">Stop EC2 Instance</button>
+        <textarea rows="4" cols="50" id="cypher"></textarea>
+        <button id="reload">Submit</button>
+        <button id="stabilize">Stabilize</button>
+    </div>
+    <div>Status Box</div>
+    <div id="statusBox">Initial Status</div>
+    <div id="viz"></div>
+    <div>Command Line Box</div>
+    <div id="terminal-output"></div>
+
+
+    <script>
+        var viz;
+
+        function draw() {
+            var config = {
+                containerId: "viz",
+                neo4j: {
+                    serverUrl: "bolt://18.116.151.211:7687",
+                    serverUser: "neo4j",
+                    serverPassword: "@Andrew07"
+                },
+                labels:  {
+                Activity: {
+                    label: "prov_type",
+                    [NeoVis.NEOVIS_ADVANCED_CONFIG]: {
+                        function: {
+								title: NeoVis.objectToTitleHtml
+							},
+						}
+                },
+                
+                Process: {
+                    label: "prov_type",
+                    [NeoVis.NEOVIS_ADVANCED_CONFIG]: {
+                        function: {
+								title: NeoVis.objectToTitleHtml
+							},
+						}
+                },
+                
+
+ 
+                
+            },
+            relationships: {
+    RELATIONSHIP: {
+        label: "RELATIONSHIP",
+        [NeoVis.NEOVIS_ADVANCED_CONFIG]: {
+            function: {
+                title: NeoVis.objectToTitleHtml
+            }
+        },
+        static: {
+            color: "#000000",
+            font: {
+                background: "none",
+                strokeWidth: "0",
+                color: "#f9dc73"
+            }
+        }
+    },
+},
+initialCypher: "MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100"
+};
+
+            viz = new NeoVis.default(config);
+            viz.render();
+            console.log(viz);
+        }
+        
+        $("#start-button").click(function() {
+            $.get("https://w0zkfy0xda.execute-api.us-east-2.amazonaws.com/prod2", function(data, status){
+                console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
+                $('#terminal-output').append("Data: " + JSON.stringify(data) + "\nStatus: " + status + "\n");
+            });
+        });
+
+        $("#stop-button").click(function() {
+            $.get("https://zxe63gzu31.execute-api.us-east-2.amazonaws.com/prod2", function(data, status){
+                console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
+                $('#terminal-output').append("Data: " + JSON.stringify(data) + "\nStatus: " + status + "\n");
+            });
+        });
+
+        let socket = new WebSocket("ws://18.116.151.211:8080");
+
+        socket.onopen = function(e) {
+            console.log("[open] Connection established");
+            $('#terminal-output').append("[open] Connection established\n");
+        };
+
+        socket.onmessage = function(event) {
+            console.log(`[message] Data received from server: ${event.data}`);
+            document.getElementById('output').innerText = event.data;
+        };
+        socket.onmessage = function(event) {
+            console.log(`Data received from server: ${event.data}`);
+            $('#terminal-output').append(`Data received from server: ${event.data}\n`);
+            };
+
+        socket.onclose = function(event) {
+            if (event.wasClean) {
+                console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+            } else {
+                console.log('[close] Connection died');
+            }
+        };
+
+        socket.onerror = function(error) {
+            console.log(`[error] ${error.message}`);
+        };
+
+        $("#reload").click(function () {
+            var cypher = $("#cypher").val();
+            if (cypher.length > 3) {
+                viz.renderWithCypher(cypher);
+            } else {
+                console.log("reload");
+                viz.reload();
+            }
+        });
+
+        $("#stabilize").click(function () {
+            viz.stabilize();
+        });
+        ;
+
+function updateStatus() {
+    fetch('http://18.116.151.211:8081/status')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(status => {
+            document.getElementById('statusBox').innerText = status;
+        })
+        .catch(error => {
+            document.getElementById('statusBox').innerText = 'Instance is offline';
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+}
+setInterval(updateStatus, 3000);
+
+    </script>
+</body>
+</html>
