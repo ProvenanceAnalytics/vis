@@ -172,7 +172,7 @@ Change them to this to decrease the heap size:
 JVMARGS="-server -Xms1G -Xmx2G"
 JVMARGSDEBUG="-server -Xms1G -Xmx2G -XX:+UseConcMarkSweepGC"
 ```
-Save the file with Ctrl + O and exit with Ctrl + X. Now that SPADE is ready to launch we should test it. Head back to the SPADE directory with `cd ..` and run `./bin/spade start` SPADE should start with a PID. Now we must add our filters and storages and reporters. Run `./bin/spade control` Now that we are in the control we can configure SPADE. We will first add a storage with `add storage JSON output=/tmp/provenance2.json` and we will add a filter to track only the hello-world program with `add filter AddAnnotation position=1 program=hello-world` Finally we will add a reporter but first we must change a few settings. Type `exit` in the control and turn off SPADE with `./bin/spade stop` and run these commands: 
+Save the file with Ctrl + O and exit with Ctrl + X. Now that SPADE is ready to launch we should test it. Head back to the SPADE directory with `cd ..` and run `./bin/spade start` SPADE should start with a PID. Now we must add our filters and storages and reporters. Run `./bin/spade control` Now that we are in the control we can configure SPADE. We will first add a storage with `add storage JSON output=/tmp/provenance2.json` and we will add a filter to track only the hello-world program with `add filter AddAnnotation position=1 program=hello-world`[^hello]. Finally we will add a reporter but first we must change a few settings. Type `exit` in the control and turn off SPADE with `./bin/spade stop` and run these commands: 
 ```
 sudo chmod ug+s `which auditctl`
 sudo chmod ug+s `which iptables`
@@ -185,6 +185,9 @@ Then run `sudo nano /etc/audit/plugins.d/af_unix.conf` and change `active = no` 
 print('hello, world!')
 ```
 Save the file and exit. Now head over to the SPADE directory `cd SPADE` and start SPADE with `./bin/spade start`. Run `cd ..` and then `python3 hello-world` then `cd SPADE` and then `./bin/spade stop`. Now we should be able to see the provenance created with `nano /tmp/provenance2.json`. Now that SPADE is ready to track hello-world we can move on to the Neo4j database install.
+
+[^hello]: This only applies to the hello-world program.
+
 ### Installing Neo4j
 Head back over to the home directory with `cd` and run these commands:
 ```
