@@ -128,9 +128,9 @@ Request ID
 50cf827d-d734-4cbc-b00c-3baa8b7efb71
 ```
 Now go back to your html file, in the script section, and add this code, and make sure to replace the invoke URL with yours.
-```
+```html
 $("#stop-button").click(function() {
-            $.get("https://ixw1yl1i34.execute-api.us-east-2.amazonaws.com/prod2", function(data, status){
+            $.get("https://INVOKE/URL/GOES/HERE", function(data, status){
                 console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
                 $('#terminal-output').append("Data: " + JSON.stringify(data) + "\nStatus: " + status + "\n");
             });
