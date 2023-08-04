@@ -957,8 +957,59 @@ sudo systemctl status startup
 Now that our startup is ready, the project should be finished.
 
 ## Uploading User Scripts	
-Another part of the project that we could think about implementing would be using user scripts/programs. We can send the uploaded scripts to the instance and compile them. The compiled program is then ran with spade with the appropriate filter, and parsed. Then displayed on the website.
+Another part of the project that we could think about implementing would be using user scripts/programs. We can send the uploaded scripts to the instance and compile them. The compiled program is then run with spade with the appropriate filter, and parsed. Then displayed on the website.
 #### This is still in progress
+### In our HTML File
+We must add these components to implement this part of the project.
+```
+</div>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="userScript">
+            <input type="button" value="Upload" onclick="uploadFile()">
+        </form>
+```
+Also in our script we need to add: 
+```
+
+fetch('http://18.116.151.211:3000/upload', {
+  method: 'POST',
+  body: data
+})
+.then(response => {
+  if (!response.ok) { // if HTTP-status is 200-299 
+    // get the error message from the body or default to response statusText
+    return response.text().then(errorMessage => { throw new Error(errorMessage || response.statusText) })
+  }
+  return response.json();
+})
+.then(data => {
+  console.log(data);
+})
+.catch(error => console.error(error));
+async function uploadFile() {
+    const form = document.getElementById('uploadForm');
+    const formData = new FormData(form);
+    
+    const response = await fetch('http://18.116.151.211:3000/upload', {
+        method: 'POST',
+        body: formData
+    });
+
+    if (!response.ok) { // if HTTP-status is 200-299 
+        // get the error message from the body or default to response statusText
+        return response.text().then(errorMessage => { throw new Error(errorMessage || response.statusText) })
+    }
+  
+    const result = await response.json();
+
+    if (response.ok) {
+        alert(result.msg);  // Display a success message
+    } else {
+        alert('Error uploading file');  // Display an error message
+    }
+}
+```
+### Back to the virtual machine
 Head to the home directory and create a new file with `nano server2.js` Fill it up with:
 ```
 const express = require('express');
