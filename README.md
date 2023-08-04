@@ -71,7 +71,7 @@ Request ID
 ``` 
 Now that our lambda function is set up, we must have a trigger that will start the function. Head back to the management console and search for the API gateway service. Click on the orange button Create API. Scroll down to the REST API option. We will use the first one which has this description "Develop a REST API where you gain complete control over the request and response along with API management capabilities." Click build and leave everything as is except for the endpoint type. Change it to regional. Click Create API. This should take you to its configuration. You should see a button that says Actions. Click that and select Create Method. Click the drop-down in the small box that was created. Select GET and click the small check mark. Another screen will appear and you will leave everything the same except you will check off the "Use Lambda Proxy integration" box. You will also put the name of the lambda function you made in the previous step. Next you will click the Actions button again and click enable CORS to allow our website to use the API. Leave everything the same and click the blue button that says "Enable CORS and replace exisiting CORS headers". Click on the "Yes, replace exisiting values" button when it pops up. Next click the Actions button again and click "Deploy API". Create a new deployment stage and name it what you would like and select it as the stage. Once you deploy it, an invoke URL will be given which you will use later in the HTML code.
 ## Configuring the security group
-Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow the following Ports with TCP and Anywhere IPV4 as the source: 7687 (neo4j db), 7474 (neo4j db), 19998 (neovis), 29998 (neovis), 19999 (neovis), 8080 (Node service), 8081 (Node service), and 7473 (neo4j db).
+Head over to your management console and go to EC2. On the left there should be a navigation pane which you will scroll down and select security groups. You will click on the security group that is related to your instance which you can view in the ec2 management console right before you click your instance. You will scroll down to inbound rules and click edit. Allow the following Ports with TCP and Anywhere IPV4 as the source: 7687 (neo4j db), 7474 (neo4j db), 19998 (neovis), 29998 (neovis), 19999 (neovis), 8080 (Node service), 8081 (Node service), 3000 (Node 2 service), and 7473 (neo4j db).
 ## Building the start button
 Once we have our lambda function setup with our API gateway. We head back to our html file and add this code:
  ```html
@@ -523,7 +523,7 @@ var viz;
             var config = {
                 containerId: "viz",
                 neo4j: {
-                    serverUrl: "bolt://18.223.165.183:7687",
+                    serverUrl: "bolt://IP.ADDRESS.OF.INSTANCE:7687",
                     serverUser: "neo4j",
                     serverPassword: "@Andrew07"
                 },
@@ -971,7 +971,7 @@ We must add these components to implement this part of the project.
 Also in our script we need to add: 
 ```
 
-fetch('http://18.116.151.211:3000/upload', {
+fetch('http://IP-ADDRESS-OF-INSTANCE:3000/upload', {
   method: 'POST',
   body: data
 })
@@ -990,7 +990,7 @@ async function uploadFile() {
     const form = document.getElementById('uploadForm');
     const formData = new FormData(form);
     
-    const response = await fetch('http://18.116.151.211:3000/upload', {
+    const response = await fetch('http://IP-ADDRESS-OF-INSTANCE:3000/upload', {
         method: 'POST',
         body: formData
     });
